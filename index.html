@@ -32,7 +32,7 @@
 
         .btn { background: var(--primary); color: #000; border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
         .btn-upi { background: #5f259f; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 10px; text-decoration: none; display: block; text-align: center; box-shadow: 0 4px 10px rgba(95,37,159,0.4); }
-        .btn-wa { background: #25D366; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 10px; text-decoration: none; display: block; text-align: center; }
+        .btn-wa { background: #25D366; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
         .info-box { background: #0b0f19; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; text-align: center; }
@@ -188,11 +188,6 @@
                         <label>Upload Profile Photo *</label>
                         <input type="file" id="pPhotoInput" accept="image/*" style="padding: 8px;">
                     </div>
-
-                    <div class="form-group">
-                        <label>Upload Document Proof (Aadhar Card) *</label>
-                        <input type="file" id="pDocInput" accept="image/*" style="padding: 8px;">
-                    </div>
                 </div>
 
                 <!-- TEAM SPECIFIC FIELDS -->
@@ -220,11 +215,6 @@
                     <div class="form-group">
                         <label>Upload Team Logo / Owner Photo *</label>
                         <input type="file" id="tLogoInput" accept="image/*" style="padding: 8px;">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Upload Owner Aadhar Card Photo *</label>
-                        <input type="file" id="tAadharInput" accept="image/*" style="padding: 8px;">
                     </div>
                 </div>
 
@@ -254,11 +244,6 @@
             <div class="form-group">
                 <label>12-Digit UTR / Transaction ID *</label>
                 <input type="text" id="utrInput" placeholder="Enter UTR Number" required minlength="10" maxlength="16">
-            </div>
-
-            <div class="form-group">
-                <label>Upload Payment Screenshot *</label>
-                <input type="file" id="ssInput" accept="image/*" required style="padding: 8px;">
             </div>
 
             <button class="btn" id="submitBtn" onclick="submitFinalForm()">Generate Official Pass</button>
@@ -307,8 +292,8 @@
         </div>
 
         <div style="margin-top: 15px;">
-            <p style="font-size: 12px; color: #ffc107; text-align: center; margin-bottom: 10px;">📸 Take a Screenshot of this Pass & send on WhatsApp.</p>
-            <a id="waBtn" href="#" target="_blank" class="btn-wa">📲 Send Pass Screenshot on WhatsApp</a>
+            <p style="font-size: 12px; color: #ffc107; text-align: center; margin-bottom: 10px;">👇 Niche button par click karke WhatsApp par details aur photo bheinjein.</p>
+            <a id="waBtn" href="#" target="_blank" class="btn-wa">📲 Complete Registration on WhatsApp</a>
             <button class="btn" onclick="showPage(1)" style="margin-top: 10px; background: transparent; color: #a0aec0; border: 1px solid #333;">Back to Home</button>
         </div>
 
@@ -365,10 +350,9 @@
             const tOwner = document.getElementById('tOwner').value;
             const tPhone = document.getElementById('tPhone').value;
             const logo = document.getElementById('tLogoInput').files[0];
-            const aadhar = document.getElementById('tAadharInput').files[0];
 
-            if (!tName || !tOwner || !tPhone || !logo || !aadhar) {
-                alert('Please fill all team details, Team Logo and Owner Aadhar Card Photo.');
+            if (!tName || !tOwner || !tPhone || !logo) {
+                alert('Please fill all team details and upload Team Logo / Owner Photo.');
                 return;
             }
 
@@ -382,10 +366,9 @@
             const pPhone = document.getElementById('pPhone').value;
             const pCity = document.getElementById('pCity').value;
             const photo = document.getElementById('pPhotoInput').files[0];
-            const doc = document.getElementById('pDocInput').files[0];
 
-            if (!pName || !pDob || !pPhone || !pCity || !photo || !doc) {
-                alert('Please fill all player details, Photo & Aadhar Card Proof.');
+            if (!pName || !pDob || !pPhone || !pCity || !photo) {
+                alert('Please fill all player details and upload Profile Photo.');
                 return;
             }
 
@@ -397,148 +380,66 @@
         showPage(3);
     }
 
-    // Helper function to compress & convert file to Base64 String
-    function fileToBase64(file) {
-        return new Promise((resolve) => {
-            if (!file) { resolve("Not Provided"); return; }
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (e) => {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    let width = img.width;
-                    let height = img.height;
-                    
-                    // Resize to max 600px width/height for fast email delivery
-                    const maxDim = 600;
-                    if (width > maxDim || height > maxDim) {
-                        if (width > height) {
-                            height *= maxDim / width;
-                            width = maxDim;
-                        } else {
-                            width *= maxDim / height;
-                            height = maxDim;
-                        }
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
-                    ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.6)); // compressed JPEG
-                };
-                img.onerror = () => resolve("Error Processing Image");
-            };
-            reader.onerror = () => resolve("Error Reading File");
-        });
-    }
-
-    async function submitFinalForm() {
+    function submitFinalForm() {
         const utr = document.getElementById('utrInput').value;
-        const ssInput = document.getElementById('ssInput').files[0];
 
         if (!utr || utr.length < 10) {
-            alert('Please enter a valid UTR Number.');
+            alert('Please enter a valid 12-Digit UTR Number.');
             return;
         }
 
-        if (!ssInput) {
-            alert('Please attach payment screenshot.');
-            return;
-        }
+        const randomNum = Math.floor(100000 + Math.random() * 900000);
+        const token = 'PPL-' + randomNum;
+        
+        document.getElementById('passToken').innerText = token;
+        let waMsg = "";
 
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.innerText = "Processing & Submitting... Please Wait ⏳";
-        submitBtn.disabled = true;
+        if (currentType === 'Team') {
+            const tName = document.getElementById('tName').value;
+            const tOwner = document.getElementById('tOwner').value;
+            const tPhone = document.getElementById('tPhone').value;
+            const tCity = document.getElementById('tCity').value || 'Patharia';
 
-        // Convert files to compressed Base64 Data
-        let photoData = "", docData = "", ssData = "";
+            document.getElementById('passBadge').innerText = 'OFFICIAL TEAM PASS';
+            document.getElementById('passName').innerText = tName;
+            document.getElementById('passCity').innerText = tCity;
+            document.getElementById('passCategory').innerText = 'Team Entry';
+            
+            document.getElementById('lblField1').innerText = 'OWNER NAME';
+            document.getElementById('valField1').innerText = tOwner;
+            
+            document.getElementById('lblField2').innerText = 'OWNER PHONE';
+            document.getElementById('valField2').innerText = tPhone;
 
-        if(currentType === 'Team') {
-            photoData = await fileToBase64(document.getElementById('tLogoInput').files[0]);
-            docData = await fileToBase64(document.getElementById('tAadharInput').files[0]);
+            waMsg = `🏆 *NEW PPL REGISTRATION (TEAM ENTRY)*%0A%0A*Token ID:* ${token}%0A*Team Name:* ${tName}%0A*Owner Name:* ${tOwner}%0A*Phone:* ${tPhone}%0A*City:* ${tCity}%0A*UTR Number:* ${utr}%0A%0A📎 _Note: Maine Payment Screenshot, Logo aur Aadhar Card Photo neeche attach kar di hai._`;
+
         } else {
-            photoData = await fileToBase64(document.getElementById('pPhotoInput').files[0]);
-            docData = await fileToBase64(document.getElementById('pDocInput').files[0]);
-        }
-        ssData = await fileToBase64(ssInput);
+            const pName = document.getElementById('pName').value;
+            const pDob = document.getElementById('pDob').value;
+            const pPhone = document.getElementById('pPhone').value;
+            const pCity = document.getElementById('pCity').value;
+            const pRole = document.getElementById('pRole').value;
+            const pBatting = document.getElementById('pBatting').value;
+            const pBowling = document.getElementById('pBowling').value;
 
-        // Prepare JSON Data
-        const payload = {
-            access_key: "8aeb6528-187c-46c1-b2ba-abcba50c013c",
-            subject: "New PPL Registration - " + (currentType === 'Team' ? document.getElementById('tName').value : document.getElementById('pName').value),
-            Registration_Type: document.getElementById('regTypeInput').value,
-            Name_or_Team: currentType === 'Team' ? document.getElementById('tName').value : document.getElementById('pName').value,
-            Phone: currentType === 'Team' ? document.getElementById('tPhone').value : document.getElementById('pPhone').value,
-            City: currentType === 'Team' ? document.getElementById('tCity').value : document.getElementById('pCity').value,
-            UTR_Number: utr,
-            Photo_Data: photoData,
-            Document_Data: docData,
-            Payment_Screenshot: ssData
-        };
+            document.getElementById('passBadge').innerText = 'APPROVED PLAYER';
+            document.getElementById('passName').innerText = pName;
+            document.getElementById('passCity').innerText = pCity;
+            document.getElementById('passCategory').innerText = currentType + ' Player';
+            
+            document.getElementById('lblField1').innerText = 'PLAYER ROLE';
+            document.getElementById('valField1').innerText = pRole;
+            
+            document.getElementById('lblField2').innerText = 'BATTING STYLE';
+            document.getElementById('valField2').innerText = pBatting;
 
-        if(currentType !== 'Team') {
-            payload.DOB = document.getElementById('pDob').value;
-            payload.Player_Role = document.getElementById('pRole').value;
-            payload.Batting_Style = document.getElementById('pBatting').value;
-            payload.Bowling_Style = document.getElementById('pBowling').value;
-        } else {
-            payload.Owner_Name = document.getElementById('tOwner').value;
+            waMsg = `🏏 *NEW PPL REGISTRATION (${currentType.toUpperCase()})*%0A%0A*Token ID:* ${token}%0A*Name:* ${pName}%0A*DOB:* ${pDob}%0A*Phone:* ${pPhone}%0A*City:* ${pCity}%0A*Role:* ${pRole}%0A*Batting:* ${pBatting}%0A*Bowling:* ${pBowling}%0A*UTR Number:* ${utr}%0A%0A📎 _Note: Maine apni Photo, Aadhar Card aur Payment Screenshot neeche attach kar di hai._`;
         }
 
-        // Send to Web3Forms
-        fetch("https://api.web3forms.com/submit", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify(payload)
-        }).then(response => response.json()).then(data => {
-            if (data.success) {
-                const randomNum = Math.floor(100000 + Math.random() * 900000);
-                const token = 'PPL-' + randomNum;
-                
-                document.getElementById('passToken').innerText = token;
-                
-                if (currentType === 'Team') {
-                    document.getElementById('passBadge').innerText = 'OFFICIAL TEAM PASS';
-                    document.getElementById('passName').innerText = document.getElementById('tName').value;
-                    document.getElementById('passCity').innerText = document.getElementById('tCity').value || 'Patharia';
-                    document.getElementById('passCategory').innerText = 'Team Entry';
-                    
-                    document.getElementById('lblField1').innerText = 'OWNER NAME';
-                    document.getElementById('valField1').innerText = document.getElementById('tOwner').value;
-                    
-                    document.getElementById('lblField2').innerText = 'OWNER PHONE';
-                    document.getElementById('valField2').innerText = document.getElementById('tPhone').value;
-                } else {
-                    document.getElementById('passBadge').innerText = 'APPROVED PLAYER';
-                    document.getElementById('passName').innerText = document.getElementById('pName').value;
-                    document.getElementById('passCity').innerText = document.getElementById('pCity').value;
-                    document.getElementById('passCategory').innerText = currentType + ' Player';
-                    
-                    document.getElementById('lblField1').innerText = 'PLAYER ROLE';
-                    document.getElementById('valField1').innerText = document.getElementById('pRole').value;
-                    
-                    document.getElementById('lblField2').innerText = 'BATTING STYLE';
-                    document.getElementById('valField2').innerText = document.getElementById('pBatting').value;
-                }
+        // WhatsApp Redirect Link (Targeting 8989042375)
+        document.getElementById('waBtn').href = `https://wa.me/918989042375?text=${waMsg}`;
 
-                const name = currentType === 'Team' ? document.getElementById('tName').value : document.getElementById('pName').value;
-                const waMsg = `Hello, I registered for PPL.%0A%0A*Name/Team:* ${name}%0A*Type:* ${currentType}%0A*Token:* ${token}%0A*UTR:* ${utr}%0A%0APlease check my attached Pass & Payment Screenshot!`;
-                
-                document.getElementById('waBtn').href = `https://wa.me/919399840937?text=${waMsg}`;
-
-                showPage(4);
-            } else {
-                alert('Submission failed: ' + data.message);
-                submitBtn.innerText = "Generate Official Pass";
-                submitBtn.disabled = false;
-            }
-        }).catch(error => {
-            alert('Submission failed. Please check internet connection.');
-            submitBtn.innerText = "Generate Official Pass";
-            submitBtn.disabled = false;
-        });
+        showPage(4);
     }
 </script>
 
